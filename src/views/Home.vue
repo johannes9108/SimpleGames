@@ -13,4 +13,21 @@ export default {
 };
 </script>
 <style lang='scss' scoped>
+#nav {
+  height: 5vh;
+  // padding: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background-color: #e8f765;
+  a {
+    font-weight: bold;
+    color: #2c3e50;
+
+    &.router-link-exact-active {
+      color: #e4f1ec;
+    }
+  }
+}
 </style>
