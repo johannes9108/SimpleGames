@@ -35,10 +35,15 @@ export default {
     score: Number,
     currentState: String
   },
+  watch: {
+    bricks: function() {
+      this.localBricks = this.bricks;
+    }
+  },
   methods: {
     select(index, brickId) {
-      console.log("Index: " + index);
-      console.log("Brick: " + brickId);
+      // console.log("Index: " + index);
+      // console.log("Brick: " + brickId);
       // this.currentState == "RUNNING" Add this to the condition for working state management
       if (!this.localBricks[index].selected && !this.busyFlag) {
         this.localBricks[index].isHidden = false;
@@ -48,15 +53,19 @@ export default {
         if (this.prevSelected != undefined) {
           if (this.prevSelected.id == brickId) {
             this.$emit("increaseScoreEvent");
-            console.log("Found pair!");
+            // console.log("Found pair!");
             this.localBricks = this.localBricks.filter(
               brick => brick.id != brickId
             );
             this.prevSelected = undefined;
+            if (this.localBricks.length == 0) {
+              // console.log("Game finished");
+              this.$emit("gameFinishedEvent");
+            }
           } else {
             this.busyFlag = true;
             setTimeout(() => {
-              console.log("Chilling for 3sec");
+              // console.log("Chilling for 3sec");
               this.localBricks[index].selected = false;
               this.prevSelected.selected = false;
               this.prevSelected.isHidden = true;
@@ -86,8 +95,8 @@ export default {
 
 .memorybrick {
   // background-color: tomato;
-  // border: 1px solid white;
-  box-shadow: 0 0 10px gray;
+  border: 1px solid white;
+  // box-shadow: 0 0 10px gray;
   border-radius: 2%;
 }
 .reveal {
@@ -99,10 +108,16 @@ export default {
 }
 @keyframes revealBrick {
   0% {
+    background-color: black;
   }
   50% {
+    background-color: black;
     transform: scale(1.05);
     // border: 10px solid white;
+  }
+  75% {
+    background-color: black;
+    transform: rotateY(180deg) scale(1.05);
   }
   100% {
     box-shadow: 0 0 10px white;

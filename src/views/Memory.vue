@@ -29,15 +29,19 @@
         <tr>
           <th>Turns</th>
           <th>Score</th>
+          <th>Avg</th>
         </tr>
         <tr>
           <td>{{turns}}</td>
+          <td>{{score}}</td>
           <td>{{score}}</td>
         </tr>
       </table>
     </nav>
 
     <GameBoard
+      v-if="currentState!='FINISHED'"
+      @gameFinishedEvent="gameFinishedHandler"
       @increaseScoreEvent="score++"
       @increaseTurnEvent="turns++"
       :currentState="currentState"
@@ -46,6 +50,23 @@
       :size="size"
       :bricks="arrangeBricks"
     />
+    <div v-else class="endState">
+      <h1>Game Finished!</h1>
+      <h2>You ended the game with</h2>
+      <table>
+        <tr>
+          <th>Score</th>
+          <th>Turns</th>
+          <th>Avg</th>
+        </tr>
+        <tr>
+          <td>{{score}}</td>
+          <td>{{turns}}</td>
+          <td>{{parseInt(score/turns)}}</td>
+        </tr>
+      </table>
+      <p>Game Resets in: {{countDown}}</p>
+    </div>
   </div>
 </template>
 
@@ -63,7 +84,7 @@ export default {
   },
   data() {
     return {
-      states: ["PREGAME", "RUNNING", "ENDSTATE"],
+      states: ["PREGAME", "RUNNING", "FINISHED"],
       currentState: "PREGAME",
       score: 0,
       turns: 0,
@@ -158,13 +179,21 @@ export default {
         }
       ],
       reactiveArr: [],
-
-      size: "8"
+      countDown: 5,
+      size: "8",
+      intervalId: 0
     };
+  },
+  watch: {
+    size() {
+      console.log("watch");
+      this.reactiveArr.splice(this.size * 2);
+    }
   },
   computed: {
     arrangeBricks() {
-      console.log("Size: " + this.size);
+      console.log("Computed");
+      // console.log("Size: " + this.size);
       let copy = [...this.bricks];
       let res = [];
 
@@ -178,7 +207,8 @@ export default {
       for (let x = 0; x < res.length; x++) {
         this.$set(this.reactiveArr, x, res[x]);
       }
-      return this.shuffle(this.reactiveArr);
+
+      return this.reactiveArr;
     }
   },
   methods: {
@@ -196,6 +226,22 @@ export default {
       this.currentState = this.states[0];
       this.turns = 0;
       this.score = 0;
+      this.size = "0";
+      this.size = "8";
+      // this.reactiveArr.splice(this.size * 2);
+    },
+    gameFinishedHandler() {
+      this.currentState = "FINISHED";
+
+      this.intervalId = setInterval(() => {
+        console.log("intervall");
+        this.countDown--;
+        if (this.countDown == 0) {
+          this.countDown = 5;
+          this.preGame();
+          clearInterval(this.intervalId);
+        }
+      }, 1000);
     }
   }
 };
@@ -226,5 +272,24 @@ nav {
 .gameOptions {
   background-color: red;
   display: flex;
+}
+
+.endState {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  // align-items: center;
+  background-color: white;
+  border-radius: 5px;
+  width: 20%;
+  height: 50%;
+  margin: auto;
+  h1 {
+    // background-color: red;
+    border-bottom: 1px solid black;
+  }
+  table {
+    align-self: center;
+  }
 }
 </style>
